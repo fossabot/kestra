@@ -1,5 +1,6 @@
 package io.kestra.core.plugins;
 
+import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.conditions.Condition;
 import io.kestra.core.models.script.ScriptRunner;
 import io.kestra.core.models.tasks.Task;
@@ -92,6 +93,7 @@ public class PluginScanner {
         List<Class<? extends ScriptRunner>> scriptRunners = new ArrayList<>();
         List<Class<?>> controllers = new ArrayList<>();
         List<String> guides = new ArrayList<>();
+        Map<String, Class<?>> aliases = new HashMap<>();
 
         final SoftServiceLoader<BeanIntrospectionReference> loader = SoftServiceLoader.load(
             BeanIntrospectionReference.class,
@@ -153,6 +155,13 @@ public class PluginScanner {
             if (beanType.isAnnotationPresent(Controller.class)) {
                 controllers.add(beanType);
             }
+
+            if (beanType.isAnnotationPresent(Plugin.class)) {
+                String[] pluginAliases = definition.getAnnotation(Plugin.class).stringValues("aliases");
+                for (String alias:  pluginAliases) {
+                    aliases.put(alias, beanType);
+                }
+            }
         }
 
         var guidesDirectory = classLoader.getResource("doc/guides");
@@ -185,6 +194,7 @@ public class PluginScanner {
             .secrets(secrets)
             .scriptRunners(scriptRunners)
             .guides(guides)
+            .aliases(aliases)
             .build();
     }
 

@@ -1,4 +1,4 @@
-package io.kestra.core.tasks.log;
+package io.kestra.plugin.tasks.log;
 
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
@@ -48,7 +48,8 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
                       - Kestra team wishes you a great day 👋
                       - If you need some help, reach out via Slack"""
         ),
-    }
+    },
+    aliases = {"io.kestra.core.tasks.log.Log"}
 )
 public class Log extends Task implements RunnableTask<VoidOutput> {
     @Schema(

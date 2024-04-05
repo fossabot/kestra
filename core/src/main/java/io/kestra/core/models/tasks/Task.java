@@ -3,10 +3,12 @@ package io.kestra.core.models.tasks;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.executions.TaskRun;
 import io.kestra.core.models.tasks.retrys.AbstractRetry;
 import io.kestra.core.runners.RunContext;
+import io.kestra.core.serializers.AliasesTypeResolver;
 import io.kestra.core.tasks.flows.WorkingDirectory;
 import io.micronaut.core.annotation.Introspected;
 import lombok.Builder;
@@ -24,7 +26,8 @@ import jakarta.validation.constraints.Pattern;
 
 import static io.kestra.core.utils.Rethrow.throwFunction;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type", visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true, include = JsonTypeInfo.As.EXISTING_PROPERTY)
+@JsonTypeIdResolver(AliasesTypeResolver.class)
 @SuperBuilder(toBuilder = true)
 @Getter
 @NoArgsConstructor

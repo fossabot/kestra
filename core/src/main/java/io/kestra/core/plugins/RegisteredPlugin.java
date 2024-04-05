@@ -38,6 +38,7 @@ public class RegisteredPlugin {
     private final List<Class<? extends SecretPluginInterface>> secrets;
     private final List<Class<? extends ScriptRunner>> scriptRunners;
     private final List<String> guides;
+    private final Map<String, Class<?>> aliases;
 
     public boolean isValid() {
         return !tasks.isEmpty() || !triggers.isEmpty() || !conditions.isEmpty() || !controllers.isEmpty() || !storages.isEmpty() || !secrets.isEmpty() || !scriptRunners.isEmpty();
@@ -46,7 +47,7 @@ public class RegisteredPlugin {
     public boolean hasClass(String cls) {
         return allClass()
             .stream()
-            .anyMatch(r -> r.getName().equals(cls));
+            .anyMatch(r -> r.getName().equals(cls)) || aliases.containsKey(cls);
     }
 
     @SuppressWarnings("rawtypes")
@@ -54,7 +55,8 @@ public class RegisteredPlugin {
         return allClass()
             .stream()
             .filter(r -> r.getName().equals(cls))
-            .findFirst();
+            .findFirst()
+            .or(() -> Optional.ofNullable(aliases.get(cls)));
     }
 
     @SuppressWarnings("rawtypes")
@@ -81,6 +83,11 @@ public class RegisteredPlugin {
 
         if (this.getScriptRunners().stream().anyMatch(r -> r.getName().equals(cls))) {
             return ScriptRunner.class;
+        }
+
+        if(this.getAliases().containsKey(cls)) {
+            // This is a quick-win, but it may trigger an infinite loop ... or not ...
+            return baseClass(this.getAliases().get(cls).getName());
         }
 
         throw new IllegalArgumentException("Unable to find base class from '" + cls + "'");
@@ -250,6 +257,12 @@ public class RegisteredPlugin {
         if (!this.getScriptRunners().isEmpty()) {
             b.append("[Script Runners: ");
             b.append(this.getScriptRunners().stream().map(Class::getName).collect(Collectors.joining(", ")));
+            b.append("] ");
+        }
+
+        if (!this.getAliases().isEmpty()) {
+            b.append("[Aliases: ");
+            b.append(this.getAliases());
             b.append("] ");
         }
 

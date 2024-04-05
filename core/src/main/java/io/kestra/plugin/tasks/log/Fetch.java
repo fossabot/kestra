@@ -1,4 +1,4 @@
-package io.kestra.core.tasks.log;
+package io.kestra.plugin.tasks.log;
 
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
@@ -49,7 +49,8 @@ import static io.kestra.core.utils.Rethrow.throwConsumer;
                 "  - \"previous_task_id\""
             }
         )
-    }
+    },
+    aliases = {"io.kestra.core.tasks.log.Fetch"}
 )
 public class Fetch extends Task implements RunnableTask<Fetch.Output> {
     @Schema(

@@ -42,7 +42,10 @@ public class PluginRegistry  {
                     .map(r -> new AbstractMap.SimpleEntry<>(r.getName(), plugin)),
                 plugin.getScriptRunners()
                     .stream()
-                    .map(r -> new AbstractMap.SimpleEntry<>(r.getName(), plugin))
+                    .map(r -> new AbstractMap.SimpleEntry<>(r.getName(), plugin)),
+                Stream.of(plugin.getAliases())
+                    .flatMap(map -> map.entrySet().stream())
+                    .map(r -> new AbstractMap.SimpleEntry<>(r.getKey(), plugin))
                 ).flatMap(i -> i)
             )
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a1, a2) -> a1));

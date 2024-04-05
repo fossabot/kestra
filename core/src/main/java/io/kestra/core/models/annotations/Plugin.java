@@ -17,4 +17,6 @@ public @interface Plugin {
      * @return whether the plugin is in beta
      */
     boolean beta() default false;
+
+    String[] aliases() default {};
 }
