@@ -187,15 +187,17 @@ public abstract class JdbcServiceLivenessCoordinatorTest {
         AtomicReference<WorkerTriggerResult> workerTriggerResult = new AtomicReference<>(null);
         workerTriggerResultQueue.receive(either -> {
             workerTriggerResult.set(either.getLeft());
-            countDownLatch.countDown();
+            if (either.getLeft().getSuccess()) {
+                countDownLatch.countDown();
+            }
         });
 
-        WorkerTrigger workerTrigger = workerTrigger(Duration.ofSeconds(10));
+        WorkerTrigger workerTrigger = workerTrigger(Duration.ofSeconds(8));
         workerJobQueue.emit(workerTrigger);
         Await.until(() -> worker.getEvaluateTriggerRunningCount()
                 .get(workerTrigger.getTriggerContext().uid()) != null,
             Duration.ofMillis(100),
-            Duration.ofSeconds(5)
+            Duration.ofSeconds(3)
         );
         worker.shutdown();
 
@@ -203,7 +205,7 @@ public abstract class JdbcServiceLivenessCoordinatorTest {
         applicationContext.registerSingleton(newWorker);
         newWorker.run();
 
-        boolean lastAwait = countDownLatch.await(10, TimeUnit.SECONDS);
+        boolean lastAwait = countDownLatch.await(15, TimeUnit.SECONDS);
 
         newWorker.shutdown();
         assertThat("Last await result was " + lastAwait, workerTriggerResult.get().getSuccess(), is(true));

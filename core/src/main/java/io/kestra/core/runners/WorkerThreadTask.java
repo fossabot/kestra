@@ -15,7 +15,6 @@ import static io.kestra.core.models.flows.State.Type.*;
 
 public class WorkerThreadTask extends AbstractWorkerThread {
     RunnableTask<?> task;
-    RunContext runContext;
     MetricRegistry metricRegistry;
 
     @Getter
@@ -24,11 +23,10 @@ public class WorkerThreadTask extends AbstractWorkerThread {
     @Getter
     Output taskOutput;
 
-    public WorkerThreadTask(Logger logger, WorkerTask workerTask, RunnableTask<?> task, RunContext runContext, MetricRegistry metricRegistry) {
-        super(logger);
+    public WorkerThreadTask(WorkerTask workerTask, RunnableTask<?> task, RunContext runContext, MetricRegistry metricRegistry) {
+        super(runContext, task.getClass().getName());
         this.workerTask = workerTask;
         this.task = task;
-        this.runContext = runContext;
         this.metricRegistry = metricRegistry;
     }
 

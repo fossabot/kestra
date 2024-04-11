@@ -6,8 +6,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import dev.failsafe.Failsafe;
-import dev.failsafe.Timeout;
 import io.kestra.core.exceptions.DeserializationException;
 import io.kestra.core.metrics.MetricRegistry;
 import io.kestra.core.models.Label;
@@ -147,6 +145,7 @@ public class Worker implements Service, Runnable, AutoCloseable {
         setState(ServiceState.CREATED);
     }
 
+    @SuppressWarnings("unchecked")
     @VisibleForTesting
     @Deprecated(forRemoval = true)
     public Worker(
@@ -525,11 +524,11 @@ public class Worker implements Service, Runnable, AutoCloseable {
             Level.WARN,
             "[date: {}] Evaluate Failed with error '{}'",
             workerTrigger.getTriggerContext().getDate(),
-            e.getMessage(),
+            e != null ? e.getMessage() : "null",
             e
         );
 
-        if (logger.isTraceEnabled()) {
+        if (logger.isTraceEnabled() && e != null) {
             logger.trace(Throwables.getStackTraceAsString(e));
         }
     }
@@ -559,7 +558,7 @@ public class Worker implements Service, Runnable, AutoCloseable {
 
         metricRunningCount.incrementAndGet();
 
-        WorkerThreadTask workerThread = new WorkerThreadTask(logger, workerTask, task, runContext, metricRegistry);
+        WorkerThreadTask workerThread = new WorkerThreadTask(workerTask, task, runContext, metricRegistry);
 
         // emit attempts
         this.workerTaskResultQueue.emit(new WorkerTaskResult(workerTask
@@ -571,9 +570,6 @@ public class Worker implements Service, Runnable, AutoCloseable {
 
         // run it
         io.kestra.core.models.flows.State.Type state = runThread(workerThread, logger);
-        if (workerTask.getTask().isAllowFailure() && state.equals(FAILED)) {
-            state = WARNING;
-        }
 
         metricRunningCount.decrementAndGet();
 
@@ -613,7 +609,11 @@ public class Worker implements Service, Runnable, AutoCloseable {
             state = workerThread.getTaskState();
         } catch (InterruptedException e) {
             logger.error("Failed to join WorkerThread {}", e.getMessage(), e);
-            state = FAILED;
+            if (workerThread instanceof WorkerThreadTask workerThreadTask) {
+                state = workerThreadTask.getWorkerTask().getTask().isAllowFailure() ? WARNING : FAILED;
+            } else {
+                state = FAILED;
+            }
         } finally {
             synchronized (this) {
                 workerThreadReferences.remove(workerThread);
