@@ -1,5 +1,6 @@
 package io.kestra.core.models.conditions;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.kestra.core.exceptions.InternalException;
 import io.kestra.core.utils.Rethrow;
@@ -18,6 +19,7 @@ import jakarta.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @Introspected
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public abstract class Condition implements Rethrow.PredicateChecked<ConditionContext, InternalException> {
     @NotNull
     @Pattern(regexp="\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*(\\.\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)*")

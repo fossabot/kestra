@@ -1,6 +1,7 @@
 package io.kestra.core.models.tasks.runners;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.runners.RunContext;
@@ -22,6 +23,7 @@ import java.util.*;
 @Getter
 @NoArgsConstructor
 @Introspected
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public abstract class TaskRunner {
     @NotBlank
     @Pattern(regexp="\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*(\\.\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*)*")
